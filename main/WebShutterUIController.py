@@ -97,14 +97,14 @@ class WebShutterUIController:
     #START - callback methods for the thread
 
     def updateRowStatus(self, rowItem, status):
-        rowItem.setStatus(Status.State[status])
+        rowItem.setStatus(status)
 
     def finishThreading(self, rowItem, status):
         self.updateRowStatus(rowItem, status)
         self.__numThreads -= 1
         
         #update database
-        self.__updateItemToDatabaes(rowItem.getItem())
+        self.__updateItemToDatabase(rowItem.getItem())
         
         
 
@@ -151,7 +151,7 @@ class WebShutterUIController:
         params = (id,)
         self.__databaseConnection.delete(sql, params)
         
-    def __updateItemToDatabaes(self, item):
-        sql = "UPDATE urls SET status = ? where id = ?"
-        params = (Status.state[item.status], item.dbId)
-        self.__databaseConnection.update(sq, params)
+    def __updateItemToDatabase(self, item):
+        sql = "UPDATE urls SET status = ?, status_label = ? where id = ?"
+        params = (item.status, Status.State[1], item.dbId)
+        self.__databaseConnection.update(sql, params)

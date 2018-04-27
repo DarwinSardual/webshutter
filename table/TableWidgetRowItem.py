@@ -50,7 +50,7 @@ class TableWidgetRowItem:
 
     def setStatus(self, status):
         self.__item.status = status
-        self.statusInput.setText(status)
+        self.statusInput.setText(Status.State[status])
 
     def setRow(self, row):
         self.__row = row
