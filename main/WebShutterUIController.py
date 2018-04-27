@@ -154,5 +154,5 @@ class WebShutterUIController:
         
     def __updateItemToDatabase(self, item):
         sql = "UPDATE urls SET status = ?, status_label = ? where id = ?"
-        params = (item.status, Status.State[1], item.dbId)
+        params = (item.status, Status.State[item.status], item.dbId)
         self.__databaseConnection.update(sql, params)
