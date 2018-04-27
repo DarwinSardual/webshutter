@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (QWidget, QMainWindow, QLineEdit, QDesktopWidget, QT
         QTableWidgetItem, QVBoxLayout, QComboBox, QPushButton)
 from table.TableWidgetRowItem import TableWidgetRowItem
 from table.WebShutterTableWidget import WebShutterTableWidget
+from PyQt5.QtGui import QIcon
 import os
 
 class WebShutterUI(QMainWindow):
@@ -19,7 +20,14 @@ class WebShutterUI(QMainWindow):
 
         self.__initWidgets()
         self.__setupTable()
+        self.__setIcons()
         self.show()
+
+    def __setIcons(self):
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        searchIconPath = os.path.join(dirname, "..\\images\\search.svg")
+        searchButtonIcon = QIcon(searchIconPath)
+        self.searchButton.setIcon(searchButtonIcon)
 
     def __initWidgets(self):
         self.filterCombo = self.uiRef.findChild(QComboBox, "filterCombo")
