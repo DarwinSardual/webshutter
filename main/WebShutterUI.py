@@ -18,6 +18,12 @@ class WebShutterUI(QMainWindow):
         self.setGeometry(50, 50, width, height)
         self.setWindowTitle("Web Shutter")
 
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        shutterIconPath = os.path.join(dirname, "..\\images\\shutter.svg")
+        shutterIcon = QIcon(shutterIconPath)
+
+        self.setWindowIcon(shutterIcon)
+
         self.__initWidgets()
         self.__setupTable()
         self.__setIcons()
@@ -26,8 +32,17 @@ class WebShutterUI(QMainWindow):
     def __setIcons(self):
         dirname = os.path.dirname(os.path.abspath(__file__))
         searchIconPath = os.path.join(dirname, "..\\images\\search.svg")
+        deleteIconPath = os.path.join(dirname, "..\\images\\delete.svg")
+        startIconPath = os.path.join(dirname, "..\\images\\play.svg")
+        
         searchButtonIcon = QIcon(searchIconPath)
         self.searchButton.setIcon(searchButtonIcon)
+        
+        deleteButtonIcon = QIcon(deleteIconPath)
+        self.deleteButton.setIcon(deleteButtonIcon)
+        
+        startButtonIcon = QIcon(startIconPath)
+        self.startStopButton.setIcon(startButtonIcon)
 
     def __initWidgets(self):
         self.filterCombo = self.uiRef.findChild(QComboBox, "filterCombo")
