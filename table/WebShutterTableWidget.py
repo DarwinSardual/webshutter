@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTableWidget, QHeaderView
+from PyQt5.QtWidgets import QTableWidget, QHeaderView, QCheckBox
 from table.TableWidgetRowInput import TableWidgetRowInput
 from PyQt5.QtCore import Qt
 
@@ -16,8 +16,11 @@ class WebShutterTableWidget(QTableWidget):
         self.__addInput()
 
     def __setGui(self):
+        self.checkboxAll = QCheckBox()
+        
         self.__setInitialRowAndColumn()
         self.__setHeaderTitles()
+        
 
     def __setInitialRowAndColumn(self):
         self.super.setRowCount(1)
@@ -26,11 +29,15 @@ class WebShutterTableWidget(QTableWidget):
     def __setHeaderTitles(self):
         titleHeader = self.super.horizontalHeader()
         numberHeader = self.super.verticalHeader()
+        
+        header = self.horizontalHeader()
+        self.checkboxAll.setParent(header)
+        self.checkboxAll.setGeometry(14, 3, 17, 17) # Position the checkbox
 
         titleHeader.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         titleHeader.setSectionResizeMode(1, QHeaderView.Stretch)
         titleHeader.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        headerTitles = ["Check", "Link", "Status"]
+        headerTitles = ["", "Link", "Status"]
         self.super.setHorizontalHeaderLabels(headerTitles)
 
     def addRowItem(self, rowItem):
