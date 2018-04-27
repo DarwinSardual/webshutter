@@ -103,6 +103,7 @@ class WebShutterUIController:
         self.updateRowStatus(rowItem, status)
         self.__numThreads -= 1
         
+        #
         #update database
         self.__updateItemToDatabase(rowItem.getItem())
         
