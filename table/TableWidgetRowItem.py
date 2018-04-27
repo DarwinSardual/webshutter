@@ -12,6 +12,7 @@ class TableWidgetRowItem:
         self.__item = item
 
         self.checkBox = QCheckBox()
+        self.checkBox.setStyleSheet("margin-left: 14px")
         self.setSelected(item.isChecked)
 
         self.linkInput = QTableWidgetItem(item.link)
