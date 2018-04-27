@@ -107,8 +107,6 @@ class WebShutterUIController:
         #update database
         self.__updateItemToDatabase(rowItem.getItem())
         
-        
-
     #END - callback methods for the thread
 
     def darwin(self):
