@@ -102,14 +102,22 @@ class WebShutterUIController:
     def finishThreading(self, rowItem, status):
         self.updateRowStatus(rowItem, status)
         self.__numThreads -= 1
+        
+        #update database
+        self.__updateItemToDatabaes(rowItem.getItem())
+        
+        
 
     #END - callback methods for the thread
 
+    def darwin(self):
+        return 0
+    
     def getGeneralArgs(self):
 
         #get the settings here
         size = { "width": 1024, "height" : 960} # define on the settings
-        path = "D:\\DarwinFiles\\Work\Projects\\webshutter\\test\\save"
+        path = "D:\\DarwinFiles\\Work\\Projects\\webshutter\\test\\save"
         #path = "/home/darwin/Projects/Python/webshutter/test/save"
 
         sizeArgs = "--size=" + str(size['width']) + "x" + str(size['height'])
@@ -121,7 +129,7 @@ class WebShutterUIController:
         }
 
         return args
-
+        
     def __startThreads(self):
         #start threading
         self.__toRun = True
@@ -133,10 +141,7 @@ class WebShutterUIController:
                 thread.start()
             time.sleep(1)
 
-        print("Start Thread Exiting")
-
-
-    def __addItemToDatabase(self, item):
+    def __addItemToDatabase(self,item):
         sql = "INSERT INTO urls(url, status, status_label, is_checked) VALUES(?, ?, ?, ?)"
         params = (item.link, item.status, Status.State[item.status], item.isChecked)
         return self.__databaseConnection.insert(sql, params)
@@ -145,3 +150,8 @@ class WebShutterUIController:
         sql = "DELETE FROM urls WHERE id = ?"
         params = (id,)
         self.__databaseConnection.delete(sql, params)
+        
+    def __updateItemToDatabaes(self, item):
+        sql = "UPDATE urls SET status = ? where id = ?"
+        params = (Status.state[item.status], item.dbId)
+        self.__databaseConnection.update(sq, params)
