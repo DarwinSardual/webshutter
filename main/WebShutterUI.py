@@ -19,7 +19,8 @@ class WebShutterUI(QMainWindow):
         self.setWindowTitle("Web Shutter")
 
         dirname = os.path.dirname(os.path.abspath(__file__))
-        shutterIconPath = os.path.join(dirname, "..\\images\\shutter.svg")
+        #shutterIconPath = os.path.join(dirname, "..\\images\\shutter.svg")
+        shutterIconPath = os.path.join(dirname, "../images/shutter.svg")
         shutterIcon = QIcon(shutterIconPath)
 
         self.setWindowIcon(shutterIcon)
@@ -31,9 +32,13 @@ class WebShutterUI(QMainWindow):
 
     def __setIcons(self):
         dirname = os.path.dirname(os.path.abspath(__file__))
-        searchIconPath = os.path.join(dirname, "..\\images\\search.svg")
-        deleteIconPath = os.path.join(dirname, "..\\images\\delete.svg")
-        startIconPath = os.path.join(dirname, "..\\images\\play.svg")
+        #searchIconPath = os.path.join(dirname, "..\\images\\search.svg")
+        #deleteIconPath = os.path.join(dirname, "..\\images\\delete.svg")
+        #startIconPath = os.path.join(dirname, "..\\images\\play.svg")
+
+        searchIconPath = os.path.join(dirname, "../images/search.svg")
+        deleteIconPath = os.path.join(dirname, "../images/delete.svg")
+        startIconPath = os.path.join(dirname, "../images/play.svg")
         
         searchButtonIcon = QIcon(searchIconPath)
         self.searchButton.setIcon(searchButtonIcon)
