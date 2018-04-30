@@ -9,10 +9,11 @@ class WebShutterTableWidget(QTableWidget):
         self.super.__init__()
         self.__setGui()
 
-        #self.__rowItems = [] # TableWidgetRowItem
-        #self.__checkedItems = [] # Reference to the checked items
-        self.__rowItems = {}
-        self.__checkedItems = {}
+        self.__rowItems = [] # TableWidgetRowItem
+        self.__checkedItems = [] # Reference to the checked items
+        #self.__rowItems = {}
+        #self.__checkedItems = {}
+        self.__numCheck = 0
 
         self.rowInput = None
         self.isInputInitialized = False
@@ -20,7 +21,7 @@ class WebShutterTableWidget(QTableWidget):
         self.__addInput()
 
     def __setGui(self):
-        self.self.__checkboxAll = QCheckBox()
+        self.__checkboxAll = QCheckBox()
 
         self.__setInitialRowAndColumn()
         self.__setHeaderTitles()
@@ -35,8 +36,8 @@ class WebShutterTableWidget(QTableWidget):
         numberHeader = self.super.verticalHeader()
 
         header = self.horizontalHeader()
-        self.self.__checkboxAll.setParent(header)
-        self.self.__checkboxAll.setGeometry(14, 3, 17, 17) # Position the checkbox
+        self.__checkboxAll.setParent(header)
+        self.__checkboxAll.setGeometry(14, 3, 17, 17) # Position the checkbox
 
         titleHeader.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         titleHeader.setSectionResizeMode(1, QHeaderView.Stretch)
@@ -53,11 +54,38 @@ class WebShutterTableWidget(QTableWidget):
         self.super.setItem(rowIndex, 1, rowItem.linkInput)
         self.super.setItem(rowIndex, 2, rowItem.statusInput)
         rowItem.setRow(rowIndex)
-        self.__rowItems[str(rowItem.getItem().dbId)] = rowItem
-        self.__checkedItems[str(rowItem.getItem().dbId)] = rowItem
+
+        self.__rowItems.append(rowItem)
+        #self.__rowItems[str(rowItem.getItem().dbId)] = rowItem
+        #self.__checkedItems[str(rowItem.getItem().dbId)] = rowItem
+        self.__numCheck += 1
+        rowItem.setToggleCallback(self.__toggleCheckbox)
+
 
         #self.__rowItems.append(rowItem)
         #self.__checkedItems.append(rowItem) # Add reference to the checked items
+
+    def deleteCheckedItems(self):
+        #sortedKeys = sorted(self.__checkedItems.keys())
+
+        #removeCount = 0
+        #for key in sortedKeys:
+        #    item = self.__checkedItems[key].getItem()
+        #    self.super.removeRow(item.getRow() - removeCount)
+        #    removeCount = removeCount + 1
+
+        items = self.getRowItems()
+
+        removeCount = 0
+        for item in items:
+            if item.isSelected():
+                id = item.getItem().dbId
+                #self.__deleteItemFromDatabase(id)
+                self.webShutterUI.tableWidget.removeRow(item.getRow() - removeCount)
+                removeCount = removeCount + 1
+                self.__numCheck -= 1
+            else:
+                item.setRow(item.getRow() - removeCount) #move the row, record the new index
 
     #getters
 
@@ -66,14 +94,26 @@ class WebShutterTableWidget(QTableWidget):
 
     def getCheckedRowItems(self):
         # implement basic searchLine
-        #checkedRowItems = []
-        #for item in self.__rowItems:
-        #    if item.checkBox.checkState() == Qt.Checked:
-        #        checkedRowItems.append(item)
+        checkedRowItems = []
+        for item in self.__rowItems:
+            if item.checkBox.checkState() == Qt.Checked:
+                checkedRowItems.append(item)
 
-        return self.__checkedItems
+        return checkedRowItems
+        #return self.__checkedItems
 
-    def __toggleCheckbox(self, item):
+    def __toggleCheckbox(self, status):
+        if status:
+            self.__numCheck += 1
+        else:
+            self.__numCheck -= 1
+
+        self.__numCheck == len(self.__rowItems)? self.__checkboxAll.checkState(Qt.Checked) : self.__checkboxAll.checkState(Qt.Unchecked)
+        #item = rowItem.getItem()
+        #if(not item.isChecked):
+        #    del self.__checkedItems[str(item.dbId)]
+        #else:
+        #    self.__checkedItems[str(item.dbId)] = rowItem
 
 
 

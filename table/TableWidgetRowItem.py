@@ -13,12 +13,12 @@ class TableWidgetRowItem:
 
         self.checkBox = QCheckBox()
         self.checkBox.setStyleSheet("margin-left: 14px")
-        self.setSelected(item.isChecked)
+        self.setChecked(item.isChecked)
 
         self.linkInput = QTableWidgetItem(item.link)
         self.statusInput = QTableWidgetItem(Status.State[item.status])
         self.table = None
-        self.__toggleCallback
+        self.__toggleCallback = None
 
         self.__setAlignment()
         self.__setFlags()
@@ -38,7 +38,7 @@ class TableWidgetRowItem:
 
     #SETTERS
 
-    def setSelected(self, isSelected):
+    def setChecked(self, isSelected):
         if isSelected == True:
             self.checkBox.setCheckState(Qt.Checked)
         else:
@@ -76,14 +76,11 @@ class TableWidgetRowItem:
     # Callbacks
 
     def setToggleCallback(self, callback):
-        return 0
+        self.__toggleCallback = callback
 
     #Signals
 
     def __stateChanged(self, state):
-        if(state == Qt.Checked):
-            self.setSelected(True)
-        else:
-            self.setSelected(False)
-
-    self.__toggleCallback && self.__toggleCallback()
+        value = state == Qt.Checked
+        self.setChecked(value)
+        self.__toggleCallback and self.__toggleCallback(value)
