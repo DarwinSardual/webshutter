@@ -18,6 +18,7 @@ class TableWidgetRowItem:
         self.linkInput = QTableWidgetItem(item.link)
         self.statusInput = QTableWidgetItem(Status.State[item.status])
         self.table = None
+        self.__toggleCallback
 
         self.__setAlignment()
         self.__setFlags()
@@ -72,6 +73,11 @@ class TableWidgetRowItem:
     #def setTable(self, table): #backup method in case we need reference to the table
         #self.table = table
 
+    # Callbacks
+
+    def setToggleCallback(self, callback):
+        return 0
+
     #Signals
 
     def __stateChanged(self, state):
@@ -79,3 +85,5 @@ class TableWidgetRowItem:
             self.setSelected(True)
         else:
             self.setSelected(False)
+
+    self.__toggleCallback && self.__toggleCallback()
