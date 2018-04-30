@@ -9,8 +9,11 @@ class WebShutterTableWidget(QTableWidget):
         self.super.__init__()
         self.__setGui()
 
-        self.__rowItems = [] # TableWidgetRowItem
-        self.__checkedItems = [] # Reference to the checked items
+        #self.__rowItems = [] # TableWidgetRowItem
+        #self.__checkedItems = [] # Reference to the checked items
+        self.__rowItems = {}
+        self.__checkedItems = {}
+
         self.rowInput = None
         self.isInputInitialized = False
 
@@ -50,8 +53,11 @@ class WebShutterTableWidget(QTableWidget):
         self.super.setItem(rowIndex, 1, rowItem.linkInput)
         self.super.setItem(rowIndex, 2, rowItem.statusInput)
         rowItem.setRow(rowIndex)
-        self.__rowItems.append(rowItem)
-        self.__checkedItems.append(rowItem) # Add reference to the checked items
+        self.__rowItems[str(rowItem.getItem().dbId)] = rowItem
+        self.__checkedItems[str(rowItem.getItem().dbId)] = rowItem
+
+        #self.__rowItems.append(rowItem)
+        #self.__checkedItems.append(rowItem) # Add reference to the checked items
 
     #getters
 
@@ -66,6 +72,10 @@ class WebShutterTableWidget(QTableWidget):
         #        checkedRowItems.append(item)
 
         return self.__checkedItems
+
+    def __toggleCheckbox(self, item):
+
+
 
     def __addInput(self): # only call this once on table init
         if self.isInputInitialized == True:
