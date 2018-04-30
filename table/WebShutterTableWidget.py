@@ -17,7 +17,7 @@ class WebShutterTableWidget(QTableWidget):
         self.__addInput()
 
     def __setGui(self):
-        self.checkboxAll = QCheckBox()
+        self.self.__checkboxAll = QCheckBox()
 
         self.__setInitialRowAndColumn()
         self.__setHeaderTitles()
@@ -32,8 +32,8 @@ class WebShutterTableWidget(QTableWidget):
         numberHeader = self.super.verticalHeader()
 
         header = self.horizontalHeader()
-        self.checkboxAll.setParent(header)
-        self.checkboxAll.setGeometry(14, 3, 17, 17) # Position the checkbox
+        self.self.__checkboxAll.setParent(header)
+        self.self.__checkboxAll.setGeometry(14, 3, 17, 17) # Position the checkbox
 
         titleHeader.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         titleHeader.setSectionResizeMode(1, QHeaderView.Stretch)
