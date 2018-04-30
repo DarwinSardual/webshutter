@@ -40,6 +40,10 @@ class WebShutterUIController:
         #self.webShutterUI.tableWidget.getCheckedRowItems()
         print("darwin")
 
+    def checkboxAllClicked(self):
+        return 0
+
+
     def deleteButtonClicked(self):
         items = self.webShutterUI.tableWidget.getRowItems()
 
@@ -153,4 +157,4 @@ class WebShutterUIController:
     def __updateItemToDatabase(self, item):
         sql = "UPDATE urls SET status = ?, status_label = ? where id = ?"
         params = (item.status, Status.State[item.status], item.dbId)
-self.__databaseConnection.update(sql, params)
+        self.__databaseConnection.update(sql, params)
