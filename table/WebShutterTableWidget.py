@@ -10,6 +10,7 @@ class WebShutterTableWidget(QTableWidget):
         self.__setGui()
 
         self.__rowItems = [] # TableWidgetRowItem
+        self.__checkedItems = [] # Reference to the checked items
         self.rowInput = None
         self.isInputInitialized = False
 
@@ -17,10 +18,10 @@ class WebShutterTableWidget(QTableWidget):
 
     def __setGui(self):
         self.checkboxAll = QCheckBox()
-        
+
         self.__setInitialRowAndColumn()
         self.__setHeaderTitles()
-        
+
 
     def __setInitialRowAndColumn(self):
         self.super.setRowCount(1)
@@ -29,7 +30,7 @@ class WebShutterTableWidget(QTableWidget):
     def __setHeaderTitles(self):
         titleHeader = self.super.horizontalHeader()
         numberHeader = self.super.verticalHeader()
-        
+
         header = self.horizontalHeader()
         self.checkboxAll.setParent(header)
         self.checkboxAll.setGeometry(14, 3, 17, 17) # Position the checkbox
@@ -50,6 +51,7 @@ class WebShutterTableWidget(QTableWidget):
         self.super.setItem(rowIndex, 2, rowItem.statusInput)
         rowItem.setRow(rowIndex)
         self.__rowItems.append(rowItem)
+        self.__checkedItems.append(rowItem) # Add reference to the checked items
 
     #getters
 
@@ -58,12 +60,12 @@ class WebShutterTableWidget(QTableWidget):
 
     def getCheckedRowItems(self):
         # implement basic searchLine
-        checkedRowItems = []
-        for item in self.__rowItems:
-            if item.checkBox.checkState() == Qt.Checked:
-                checkedRowItems.append(item)
-                
-        return checkedRowItems
+        #checkedRowItems = []
+        #for item in self.__rowItems:
+        #    if item.checkBox.checkState() == Qt.Checked:
+        #        checkedRowItems.append(item)
+
+        return self.__checkedItems
 
     def __addInput(self): # only call this once on table init
         if self.isInputInitialized == True:
