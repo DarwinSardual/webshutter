@@ -25,37 +25,30 @@ class WebShutterUIController:
 
     def __initSignals(self):
         self.webShutterUI.tableWidget.rowInput.addButton.clicked.connect(self.addButtonClicked)
-        self.webShutterUI.searchButton.clicked.connect(self.searchButtonClicked)
         self.webShutterUI.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.webShutterUI.searchButton.clicked.connect(self.searchButtonClicked)
         self.webShutterUI.startStopButton.clicked.connect(self.startStopButtonClicked)
 
 
     def searchButtonClicked(self):
-        #comboBox = self.webShutterUI.filterCombo;
-        #searchText = self.webShutterUI.searchLine.text()
-        #filterBy = comboBox.currentText()
+        comboBox = self.webShutterUI.filterCombo;
+        searchText = self.webShutterUI.searchLine.text().strip()
+        filterBy = comboBox.currentText().lower()
         # implement search
-
-        #self.webShutterUI.tableWidget.getCheckedRowItems()
-        print("darwin")
+        
+        res = self.__searchFromDatabase(searchText, filterBy)
+        print(res)
 
     def checkboxAllClicked(self):
         return 0
 
 
     def deleteButtonClicked(self):
-        items = self.webShutterUI.tableWidget.getRowItems()
-
-        removeCount = 0
+        items = self.webShutterUI.tableWidget.deleteCheckedItems()
         for item in items:
-            if item.isSelected():
-                id = item.getItem().dbId
-                self.__deleteItemFromDatabase(id)
-                self.webShutterUI.tableWidget.removeRow(item.getRow() - removeCount)
-                removeCount = removeCount + 1
-            else:
-                item.setRow(item.getRow() - removeCount) #move the row, record the new index
+            self.__deleteItemFromDatabase(item.getItem().dbId)
+        
+        
 
     def addButtonClicked(self):
 
@@ -74,6 +67,8 @@ class WebShutterUIController:
 
     def startStopButtonClicked(self):
         checkedRowItems = self.webShutterUI.tableWidget.getCheckedRowItems()
+        print(checkedRowItems)
+        
         args = self.getGeneralArgs()
 
         for item in checkedRowItems:
@@ -96,7 +91,7 @@ class WebShutterUIController:
         #spawn a new thread to start the threads
         startThread = Thread(target=self.__startThreads)
         startThread.start()
-
+        
 
     #START - callback methods for the thread
 
@@ -143,6 +138,20 @@ class WebShutterUIController:
                 thread = self.__threads.popleft()
                 thread.start()
             time.sleep(1)
+        
+
+    def __searchFromDatabase(self, searchText, filterBy):
+        sql = "SELECT * from urls "
+        params = ()
+        
+        if filterBy == "url" or filterBy == "status":
+            sql += "Where url like ?"
+            params = (searchText + "%", )
+        else:
+            sql += "WHERE url LIKE ? or status LIKE ?"
+            params = (searchText + "%", searchText + "%")
+            
+        return self.__databaseConnection.fetchall(sql, params)
 
     def __addItemToDatabase(self,item):
         sql = "INSERT INTO urls(url, status, status_label, is_checked) VALUES(?, ?, ?, ?)"

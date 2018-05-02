@@ -53,39 +53,44 @@ class WebShutterTableWidget(QTableWidget):
         self.super.setCellWidget(rowIndex, 0, rowItem.checkBox)
         self.super.setItem(rowIndex, 1, rowItem.linkInput)
         self.super.setItem(rowIndex, 2, rowItem.statusInput)
-        rowItem.setRow(rowIndex)
 
         self.__rowItems.append(rowItem)
         #self.__rowItems[str(rowItem.getItem().dbId)] = rowItem
         #self.__checkedItems[str(rowItem.getItem().dbId)] = rowItem
         self.__numCheck += 1
         rowItem.setToggleCallback(self.__toggleCheckbox)
+        
+        self.__checkboxAll.setCheckState(Qt.Checked) if  self.__numCheck == len(self.__rowItems) else self.__checkboxAll.setCheckState(Qt.Unchecked)
 
 
         #self.__rowItems.append(rowItem)
         #self.__checkedItems.append(rowItem) # Add reference to the checked items
 
     def deleteCheckedItems(self):
-        #sortedKeys = sorted(self.__checkedItems.keys())
-
-        #removeCount = 0
-        #for key in sortedKeys:
-        #    item = self.__checkedItems[key].getItem()
-        #    self.super.removeRow(item.getRow() - removeCount)
-        #    removeCount = removeCount + 1
-
-        items = self.getRowItems()
+        items = self.__rowItems
 
         removeCount = 0
+        remainingItems = []
+        deletedItems = []
         for item in items:
             if item.isSelected():
                 id = item.getItem().dbId
-                #self.__deleteItemFromDatabase(id)
-                self.webShutterUI.tableWidget.removeRow(item.getRow() - removeCount)
+                self.super.removeRow(item.getRow() - removeCount)
                 removeCount = removeCount + 1
-                self.__numCheck -= 1
+                deletedItems.append(item)
+                
             else:
                 item.setRow(item.getRow() - removeCount) #move the row, record the new index
+                remainingItems.append(item)
+            
+        
+        items[:] = remainingItems
+        return deletedItems
+    
+    def clearTable(self):
+        while self.super.rowCount() > 1:
+            self.super.removeRow(0)
+        
 
     #getters
 
@@ -108,7 +113,8 @@ class WebShutterTableWidget(QTableWidget):
         else:
             self.__numCheck -= 1
 
-        self.__numCheck == len(self.__rowItems)? self.__checkboxAll.checkState(Qt.Checked) : self.__checkboxAll.checkState(Qt.Unchecked)
+        
+        self.__checkboxAll.setCheckState(Qt.Checked) if  self.__numCheck == len(self.__rowItems) else self.__checkboxAll.setCheckState(Qt.Unchecked)
         #item = rowItem.getItem()
         #if(not item.isChecked):
         #    del self.__checkedItems[str(item.dbId)]
