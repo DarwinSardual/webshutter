@@ -19,6 +19,8 @@ class WebShutterTableWidget(QTableWidget):
         self.isInputInitialized = False
 
         self.__addInput()
+        
+        self.__checkboxAll.clicked.connect(self.__checkboxAllStateChanged)
 
     def __setGui(self):
         self.__checkboxAll = QCheckBox()
@@ -87,6 +89,11 @@ class WebShutterTableWidget(QTableWidget):
         items[:] = remainingItems
         return deletedItems
     
+    def checkAllItems(self, isChecked):
+        for item in self.__rowItems:
+            print(item.getItem().link)
+            item.setChecked(isChecked)
+    
     def clearTable(self):
         while self.super.rowCount() > 1:
             self.super.removeRow(0)
@@ -133,3 +140,10 @@ class WebShutterTableWidget(QTableWidget):
         self.super.setCellWidget(0, 2, self.rowInput.addButton)
         self.super.setSpan(0, 0, 1, 2)
         self.isInputInitialized = True
+
+    def __checkboxAllStateChanged(self):
+        
+        value = True if self.__checkboxAll.checkState() == Qt.Checked else False
+        self.checkAllItems(value)
+        #print(value)    
+        

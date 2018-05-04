@@ -37,7 +37,14 @@ class WebShutterUIController:
         # implement search
         
         res = self.__searchFromDatabase(searchText, filterBy)
-        print(res)
+        self.webShutterUI.tableWidget.clearTable()
+        #print(res)
+        for dbId, url, status, statusText, isChecked in res:
+            item = Item(dbId, url, status, isChecked)
+            print(item.status)
+            tableRowItem = TableWidgetRowItem(item)
+            self.webShutterUI.tableWidget.addRowItem(tableRowItem)  
+            
 
     def checkboxAllClicked(self):
         return 0
@@ -144,11 +151,14 @@ class WebShutterUIController:
         sql = "SELECT * from urls "
         params = ()
         
-        if filterBy == "url" or filterBy == "status":
+        if filterBy == "url":
             sql += "Where url like ?"
             params = (searchText + "%", )
+        elif filterBy == "status":
+            sql += "Where status_label like ?"
+            params = (searchText + "%", )
         else:
-            sql += "WHERE url LIKE ? or status LIKE ?"
+            sql += "WHERE url LIKE ? or status_label LIKE ?"
             params = (searchText + "%", searchText + "%")
             
         return self.__databaseConnection.fetchall(sql, params)
