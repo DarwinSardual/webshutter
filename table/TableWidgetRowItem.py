@@ -83,4 +83,4 @@ class TableWidgetRowItem:
     def __stateChanged(self, state):
         value = state == Qt.Checked
         self.setChecked(value)
-        self.__toggleCallback and self.__toggleCallback(value)
+        self.__toggleCallback and self.__toggleCallback(self.__item)

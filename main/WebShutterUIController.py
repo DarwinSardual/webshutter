@@ -22,12 +22,19 @@ class WebShutterUIController:
         self.__threads = deque()
         self.results = Queue()
         self.resultToProcess = 0
+        
+        self.__setupTable()
+        
 
     def __initSignals(self):
         self.webShutterUI.tableWidget.rowInput.addButton.clicked.connect(self.addButtonClicked)
         self.webShutterUI.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.webShutterUI.searchButton.clicked.connect(self.searchButtonClicked)
         self.webShutterUI.startStopButton.clicked.connect(self.startStopButtonClicked)
+        
+    def __setupTable(self):
+         data = self.__fetchAllDataFromDatabase()
+         self.fillTable(data)
 
 
     def searchButtonClicked(self):
@@ -38,25 +45,20 @@ class WebShutterUIController:
         
         res = self.__searchFromDatabase(searchText, filterBy)
         self.webShutterUI.tableWidget.clearTable()
-        #print(res)
-        for dbId, url, status, statusText, isChecked in res:
+        self.fillTable(res)
+    
+    def fillTable(self, items):
+        for dbId, url, status, statusText, isChecked in items:
             item = Item(dbId, url, status, isChecked)
-            print(item.status)
-            tableRowItem = TableWidgetRowItem(item)
-            self.webShutterUI.tableWidget.addRowItem(tableRowItem)  
-            
-
-    def checkboxAllClicked(self):
-        return 0
-
+            rowItem = TableWidgetRowItem(item)
+            rowItem.setToggleCallback(self.__toggleCheckbox)
+            self.webShutterUI.tableWidget.addRowItem(rowItem)
 
     def deleteButtonClicked(self):
         items = self.webShutterUI.tableWidget.deleteCheckedItems()
         for item in items:
             self.__deleteItemFromDatabase(item.getItem().dbId)
         
-        
-
     def addButtonClicked(self):
 
         links = self.webShutterUI.tableWidget.rowInput.linkInput.toPlainText()
@@ -67,8 +69,9 @@ class WebShutterUIController:
             id = self.__addItemToDatabase(item)
             if id > 0:
                 item.dbId = id
-            tableRowItem = TableWidgetRowItem(item)
-            self.webShutterUI.tableWidget.addRowItem(tableRowItem)
+            rowItem = TableWidgetRowItem(item)
+            self.webShutterUI.tableWidget.addRowItem(rowItem)
+            rowItem.setToggleCallback(self.__toggleCheckbox)
 
         self.webShutterUI.tableWidget.rowInput.linkInput.setText("")
 
@@ -91,7 +94,7 @@ class WebShutterUIController:
 
             thread = WebShutterThread(commandStr, item)
             thread.finishCallback.connect(self.finishThreading)
-            thread.toProcessCallback.connect(self.updateRowStatus)
+            thread.toProcessCallback.connect(self.updateRowItem)
 
             self.__threads.append(thread)
 
@@ -102,11 +105,13 @@ class WebShutterUIController:
 
     #START - callback methods for the thread
 
-    def updateRowStatus(self, rowItem, status):
+    def updateRowItem(self, rowItem, status, isChecked = None):
         rowItem.setStatus(status)
+        if not isChecked == None:
+            rowItem.setChecked(isChecked)
 
     def finishThreading(self, rowItem, status):
-        self.updateRowStatus(rowItem, status)
+        self.updateRowItem(rowItem, status)
         self.__numThreads -= 1
 
         #
@@ -114,9 +119,6 @@ class WebShutterUIController:
         self.__updateItemToDatabase(rowItem.getItem())
 
     #END - callback methods for the thread
-
-    def darwin(self):
-        return 0
 
     def getGeneralArgs(self):
 
@@ -134,6 +136,19 @@ class WebShutterUIController:
         }
 
         return args
+    
+    def __toggleCheckbox(self, item):
+       
+        checkbox = self.webShutterUI.tableWidget.getCheckboxAll()
+        
+        if item.isChecked:
+            self.webShutterUI.tableWidget.setNumCheck(self.webShutterUI.tableWidget.getNumCheck() + 1)
+        else:
+            self.webShutterUI.tableWidget.setNumCheck(self.webShutterUI.tableWidget.getNumCheck() - 1)
+
+        checkbox.setCheckState(Qt.Checked) if  self.webShutterUI.tableWidget.getNumCheck() == len(self.webShutterUI.tableWidget.getRowItems()) else checkbox.setCheckState(Qt.Unchecked)
+        self.__updateItemToDatabase(item)
+
 
     def __startThreads(self):
         #start threading
@@ -146,6 +161,11 @@ class WebShutterUIController:
                 thread.start()
             time.sleep(1)
         
+
+    def __fetchAllDataFromDatabase(self):
+        sql = "select * from urls"
+        data = self.__databaseConnection.fetchall(sql)
+        return data
 
     def __searchFromDatabase(self, searchText, filterBy):
         sql = "SELECT * from urls "
@@ -174,6 +194,6 @@ class WebShutterUIController:
         self.__databaseConnection.delete(sql, params)
 
     def __updateItemToDatabase(self, item):
-        sql = "UPDATE urls SET status = ?, status_label = ? where id = ?"
-        params = (item.status, Status.State[item.status], item.dbId)
+        sql = "UPDATE urls SET status = ?, status_label = ?, is_checked = ? where id = ?"
+        params = (item.status, Status.State[item.status], item.isChecked, item.dbId)
         self.__databaseConnection.update(sql, params)

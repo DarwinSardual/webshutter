@@ -6,7 +6,7 @@ from PyQt5 import QtCore
 class WebShutterThread(QtCore.QThread):
 
     finishCallback = QtCore.pyqtSignal(object, object)
-    toProcessCallback = QtCore.pyqtSignal(object, object)
+    toProcessCallback = QtCore.pyqtSignal(object, object, object)
 
     def __init__(self, command, rowItem):
         self.super = super(WebShutterThread, self)
@@ -16,9 +16,9 @@ class WebShutterThread(QtCore.QThread):
 
 
     def run(self):
-        self.toProcessCallback.emit(self.rowItem, Status.IN_PROCESS)
-        #os.environ["PHANTOMJS_EXECUTABLE"] = str(Config.ENV)
-        os.environ["PATH"] += os.pathsep + str(Config.ENV)
+        self.toProcessCallback.emit(self.rowItem, Status.IN_PROCESS, False)
+        os.environ["PHANTOMJS_EXECUTABLE"] = str(Config.ENV)
+        #os.environ["PATH"] += os.pathsep + str(Config.ENV)
         p = subprocess.Popen(self.command, env=os.environ, stdout=subprocess.PIPE, shell=True)
 
         while True:
