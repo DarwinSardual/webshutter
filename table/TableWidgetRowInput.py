@@ -11,7 +11,7 @@ class TableWidgetRowInput:
         self.addButton = QPushButton()
         
         dirname = os.path.dirname(os.path.abspath(__file__))
-        addIconPath = os.path.join(dirname, "..\\images\\add.svg")
+        addIconPath = os.path.join(dirname, "../images/add.svg")
         addButtonIcon = QIcon(addIconPath)
         self.addButton.setIcon(addButtonIcon)
         
