@@ -1,9 +1,9 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import (QWidget, QMainWindow, QLineEdit, QDesktopWidget, QTableWidget,
-        QTableWidgetItem, QVBoxLayout, QComboBox, QPushButton)
+        QTableWidgetItem, QVBoxLayout, QComboBox, QPushButton, QAction, QLabel)
 from table.TableWidgetRowItem import TableWidgetRowItem
 from table.WebShutterTableWidget import WebShutterTableWidget
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 import os
 
 class WebShutterUI(QMainWindow):
@@ -18,9 +18,9 @@ class WebShutterUI(QMainWindow):
         self.setGeometry(50, 50, width, height)
         self.setWindowTitle("Web Shutter")
 
-        dirname = os.path.dirname(os.path.abspath(__file__))
+        self.dirname = os.path.dirname(os.path.abspath(__file__))
         #shutterIconPath = os.path.join(dirname, "..\\images\\shutter.svg")
-        shutterIconPath = os.path.join(dirname, "../images/shutter.svg")
+        shutterIconPath = os.path.join(self.dirname, "../images/shutter.svg")
         shutterIcon = QIcon(shutterIconPath)
 
         self.setWindowIcon(shutterIcon)
@@ -31,14 +31,14 @@ class WebShutterUI(QMainWindow):
         self.show()
 
     def __setIcons(self):
-        dirname = os.path.dirname(os.path.abspath(__file__))
         #searchIconPath = os.path.join(dirname, "..\\images\\search.svg")
         #deleteIconPath = os.path.join(dirname, "..\\images\\delete.svg")
         #startIconPath = os.path.join(dirname, "..\\images\\play.svg")
 
-        searchIconPath = os.path.join(dirname, "../images/search.svg")
-        deleteIconPath = os.path.join(dirname, "../images/delete.svg")
-        startIconPath = os.path.join(dirname, "../images/play.svg")
+        searchIconPath = os.path.join(self.dirname, "../images/search.svg")
+        deleteIconPath = os.path.join(self.dirname, "../images/delete.svg")
+        startIconPath = os.path.join(self.dirname, "../images/play.svg")
+        filterIconPath = os.path.join(self.dirname, "../images/filter.svg")
         
         searchButtonIcon = QIcon(searchIconPath)
         self.searchButton.setIcon(searchButtonIcon)
@@ -48,6 +48,7 @@ class WebShutterUI(QMainWindow):
         
         startButtonIcon = QIcon(startIconPath)
         self.startStopButton.setIcon(startButtonIcon)
+        
 
     def __initWidgets(self):
         self.filterCombo = self.uiRef.findChild(QComboBox, "filterCombo")
@@ -56,6 +57,8 @@ class WebShutterUI(QMainWindow):
         self.searchButton = self.uiRef.findChild(QPushButton, "searchButton")
         self.deleteButton = self.uiRef.findChild(QPushButton, "deleteButton")
         self.startStopButton = self.uiRef.findChild(QPushButton, "startStopButton")
+        self.preferencesAction = self.uiRef.findChild(QAction, "preferences")
+        
 
     def __setupTable(self):
         verticalLayout = self.uiRef.findChild(QVBoxLayout, "verticalLayout")

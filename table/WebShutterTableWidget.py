@@ -103,6 +103,9 @@ class WebShutterTableWidget(QTableWidget):
     def clearTable(self):
         while self.super.rowCount() > 1:
             self.super.removeRow(0)
+            
+        self.__rowItems = []
+        self.__numCheck = 0
         
 
     #getters

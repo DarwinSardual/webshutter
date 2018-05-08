@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QCheckBox, QTableWidgetItem, QWidget
-from util.Status import Status
+from Status import Status
 
 class TableWidgetRowItem:
 

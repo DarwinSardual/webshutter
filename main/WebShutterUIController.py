@@ -1,15 +1,19 @@
-from main.WebShutterUI import WebShutterUI
-from table.TableWidgetRowItem import TableWidgetRowItem
-from PyQt5.QtCore import Qt
 import re, time
-from util.Status import Status
-from util.Item import Item
-from util.SqliteCon import SqliteCon
-from util.Config import Config
-from collections import deque
-from util.WebShutterThread import WebShutterThread
+import os, sys
 from queue import Queue
+from collections import deque
 from threading import Thread
+import json
+from PyQt5.QtCore import Qt
+
+from WebShutterUI import WebShutterUI
+from TableWidgetRowItem import TableWidgetRowItem
+from Status import Status
+from Item import Item
+from SqliteCon import SqliteCon
+from Config import Config
+from WebShutterThread import WebShutterThread
+from PreferencesUIController import PreferencesUIController
 
 class WebShutterUIController:
 
@@ -23,14 +27,31 @@ class WebShutterUIController:
         self.results = Queue()
         self.resultToProcess = 0
         
-        self.__setupTable()
+        self.dirname = os.path.dirname(os.path.abspath(__file__))
         
-
+        self.__setupTable()
+        self.__checkPreferences()
+    
+    def __checkPreferences(self):
+        '''
+        prefPath = os.path.join(self.dirname, "../prefs/preferences.json")
+        
+        try:
+            self.prefFile = open(prefPath, "r")
+            self.prefFile.close()
+        except FileNotFoundError:
+            self.prefFile = open(prefPath, "w")
+            self.prefFile.write(json.dumps(Config.PREF_DEFAULT))
+            self.prefFile.close()
+        '''
+        
+        print(Config.checkPreferencesConfigFormat())
     def __initSignals(self):
         self.webShutterUI.tableWidget.rowInput.addButton.clicked.connect(self.addButtonClicked)
         self.webShutterUI.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.webShutterUI.searchButton.clicked.connect(self.searchButtonClicked)
         self.webShutterUI.startStopButton.clicked.connect(self.startStopButtonClicked)
+        self.webShutterUI.preferencesAction.triggered.connect(self.preferencesActionTriggered)
         
     def __setupTable(self):
          data = self.__fetchAllDataFromDatabase()
@@ -76,6 +97,13 @@ class WebShutterUIController:
         self.webShutterUI.tableWidget.rowInput.linkInput.setText("")
 
     def startStopButtonClicked(self):
+        
+        
+        if self.__toRun:
+            self.__toRun = False
+            return
+
+        
         checkedRowItems = self.webShutterUI.tableWidget.getCheckedRowItems()
         print(checkedRowItems)
         
@@ -101,7 +129,9 @@ class WebShutterUIController:
         #spawn a new thread to start the threads
         startThread = Thread(target=self.__startThreads)
         startThread.start()
-        
+
+    def preferencesActionTriggered(self):
+        self.pref = PreferencesUIController()
 
     #START - callback methods for the thread
 
@@ -123,6 +153,7 @@ class WebShutterUIController:
     def getGeneralArgs(self):
 
         #get the settings here
+        
         size = { "width": 1024, "height" : 960} # define on the settings
         path = "D:\\DarwinFiles\\Work\\Projects\\webshutter\\test\\save"
         #path = "/home/darwin/Projects/Python/webshutter/test/save"

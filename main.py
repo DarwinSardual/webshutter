@@ -1,6 +1,12 @@
-import sys
+import sys, os
 from PyQt5.QtWidgets import QApplication
-from main.WebShutterUIController import WebShutterUIController
+
+sys.path.append(os.path.join(os.getcwd(), "prefs"))
+sys.path.append(os.path.join(os.getcwd(), "main"))
+sys.path.append(os.path.join(os.getcwd(), "table"))
+sys.path.append(os.path.join(os.getcwd(), "util"))
+
+from WebShutterUIController import WebShutterUIController
 
 class Main:
     def run(self):
