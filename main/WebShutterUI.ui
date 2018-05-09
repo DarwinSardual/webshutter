@@ -80,27 +80,27 @@
      <x>0</x>
      <y>0</y>
      <width>581</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Fi&amp;le</string>
     </property>
-    <addaction name="preferences"/>
-    <addaction name="action_Exit"/>
+    <addaction name="preferencesAction"/>
+    <addaction name="exitAction"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="preferences">
+  <action name="preferencesAction">
    <property name="text">
-    <string>Preferences</string>
+    <string>&amp;Preferences</string>
    </property>
   </action>
-  <action name="action_Exit">
+  <action name="exitAction">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
    </property>
   </action>
  </widget>

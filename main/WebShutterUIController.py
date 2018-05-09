@@ -30,28 +30,14 @@ class WebShutterUIController:
         self.dirname = os.path.dirname(os.path.abspath(__file__))
         
         self.__setupTable()
-        self.__checkPreferences()
     
-    def __checkPreferences(self):
-        '''
-        prefPath = os.path.join(self.dirname, "../prefs/preferences.json")
-        
-        try:
-            self.prefFile = open(prefPath, "r")
-            self.prefFile.close()
-        except FileNotFoundError:
-            self.prefFile = open(prefPath, "w")
-            self.prefFile.write(json.dumps(Config.PREF_DEFAULT))
-            self.prefFile.close()
-        '''
-        
-        print(Config.checkPreferencesConfigFormat())
     def __initSignals(self):
         self.webShutterUI.tableWidget.rowInput.addButton.clicked.connect(self.addButtonClicked)
         self.webShutterUI.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.webShutterUI.searchButton.clicked.connect(self.searchButtonClicked)
         self.webShutterUI.startStopButton.clicked.connect(self.startStopButtonClicked)
         self.webShutterUI.preferencesAction.triggered.connect(self.preferencesActionTriggered)
+        self.webShutterUI.exitAction.triggered.connect(self.webShutterUI.close)
         
     def __setupTable(self):
          data = self.__fetchAllDataFromDatabase()
@@ -83,6 +69,11 @@ class WebShutterUIController:
     def addButtonClicked(self):
 
         links = self.webShutterUI.tableWidget.rowInput.linkInput.toPlainText()
+        links = links.strip()
+        
+        if links == "":
+            return # empty string
+        
         linkList = re.split("\s+", links)
 
         for link in linkList:
@@ -105,7 +96,6 @@ class WebShutterUIController:
 
         
         checkedRowItems = self.webShutterUI.tableWidget.getCheckedRowItems()
-        print(checkedRowItems)
         
         args = self.getGeneralArgs()
 
@@ -131,6 +121,10 @@ class WebShutterUIController:
         startThread.start()
 
     def preferencesActionTriggered(self):
+        
+        if not Config.checkPreferencesConfig() and not Config.checkPreferencesConfigFormat():
+            Config.createPreferencesConfig()
+            
         self.pref = PreferencesUIController()
 
     #START - callback methods for the thread
@@ -152,13 +146,15 @@ class WebShutterUIController:
 
     def getGeneralArgs(self):
 
-        #get the settings here
-        
-        size = { "width": 1024, "height" : 960} # define on the settings
-        path = "D:\\DarwinFiles\\Work\\Projects\\webshutter\\test\\save"
-        #path = "/home/darwin/Projects/Python/webshutter/test/save"
+        if not Config.checkPreferencesConfig() and not Config.checkPreferencesConfigFormat():
+            Config.createPreferencesConfig()
+            
+        pref = Config.getConfig()
 
-        sizeArgs = "--size=" + str(size['width']) + "x" + str(size['height'])
+        #get the settings here
+        #path = "D:\\DarwinFiles\\Work\\Projects\\webshutter\\test\\save"
+        path = "/home/darwin/Projects/Python/webshutter/test/save"
+        sizeArgs = "--size=" + str(pref["dimensions"]["width"]) + "x" + str(pref["dimensions"]["height"])
         deviceArgs = "--desktop"
         pathArgs = "--output" + path
 

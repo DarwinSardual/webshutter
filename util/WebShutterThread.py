@@ -17,8 +17,8 @@ class WebShutterThread(QtCore.QThread):
 
     def run(self):
         self.toProcessCallback.emit(self.rowItem, Status.IN_PROCESS, False)
-        os.environ["PHANTOMJS_EXECUTABLE"] = str(Config.ENV)
-        #os.environ["PATH"] += os.pathsep + str(Config.ENV)
+        #os.environ["PHANTOMJS_EXECUTABLE"] = str(Config.ENV)
+        os.environ["PATH"] += os.pathsep + str(Config.ENV)
         p = subprocess.Popen(self.command, env=os.environ, stdout=subprocess.PIPE, shell=True)
 
         while True:

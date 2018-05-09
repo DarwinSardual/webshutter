@@ -7,10 +7,10 @@ class Config:
     CURRENT_DIR = os.getcwd()
     PYTHON_PATH = "";
     PHANTOMJS_EXECUTABLE = os.path.join(CURRENT_DIR, "scripts\\phantomjs\\bin\\phantomjs.exe")
-    #CASPERJS_PATH = os.path.join(CURRENT_DIR, "scripts\\casperjs\\bin\\casperjs")
+    CASPERJS_PATH = os.path.join(CURRENT_DIR, "scripts\\casperjs\\bin\\casperjs")
     #SCREENSHOT_SCRIPT_PATH = os.path.join(CURRENT_DIR, "scripts\\capture.js")
     
-    #PHANTOMJS_EXECUTABLE = os.path.join(CURRENT_DIR, "scripts/phantomjs/bin/")
+    PHANTOMJS_EXECUTABLE = os.path.join(CURRENT_DIR, "scripts/phantomjs/bin/")
     CASPERJS_PATH = os.path.join(CURRENT_DIR, "scripts/casperjs/bin/casperjs")
     SCREENSHOT_SCRIPT_PATH = os.path.join(CURRENT_DIR, "scripts/capture.js")
     
@@ -20,7 +20,7 @@ class Config:
 
     ENV = PHANTOMJS_EXECUTABLE
     
-    PREF_DEFAULT = {"dimensions":{"width": 1024, "height": 960}, "mode": "desktop"}
+    PREF_DEFAULT = {"mode": "desktop", "dimensions":{"width": 1024, "height": 960}}
 
     
     @staticmethod
@@ -31,12 +31,15 @@ class Config:
         return os.path.isfile(prefPath)
     
     @staticmethod
-    def createPreferencesConfig():
+    def createPreferencesConfig(pref = False):
         dirname = os.path.dirname(os.path.abspath(__file__))
         prefPath = os.path.join(dirname, "../prefs/preferences.json")
         
+        if not pref:
+            pref = Config.PREF_DEFAULT
+        
         prefFile = open(prefPath, "w")
-        prefFile.write(json.dumps(Config.PREF_DEFAULT))
+        prefFile.write(json.dumps(pref))
         prefFile.close()
     
     @staticmethod
@@ -61,9 +64,24 @@ class Config:
                 
             if isinstance(pref["mode"], str):
                 if not (pref["mode"] == "desktop" or pref["mode"] == "mobile"):
-                    Config.createPreferencesConfig()
+                    return False
                 #else everything is correct
             else:
-                Config.createPreferencesConfig()
+                return False
         except (JSONDecodeError, ValueError, KeyError):
-            Config.createPreferencesConfig()
+            return False
+        
+        return True
+            
+    @staticmethod
+    def getConfig():
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        prefPath = os.path.join(dirname, "../prefs/preferences.json")
+            
+        prefFile = open(prefPath, "r")
+        pref = json.loads(prefFile.read())
+            
+        prefFile.close()
+        return pref
+        
+    

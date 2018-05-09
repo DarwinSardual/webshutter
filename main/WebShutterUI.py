@@ -57,7 +57,8 @@ class WebShutterUI(QMainWindow):
         self.searchButton = self.uiRef.findChild(QPushButton, "searchButton")
         self.deleteButton = self.uiRef.findChild(QPushButton, "deleteButton")
         self.startStopButton = self.uiRef.findChild(QPushButton, "startStopButton")
-        self.preferencesAction = self.uiRef.findChild(QAction, "preferences")
+        self.preferencesAction = self.uiRef.findChild(QAction, "preferencesAction")
+        self.exitAction = self.uiRef.findChild(QAction, "exitAction")
         
 
     def __setupTable(self):

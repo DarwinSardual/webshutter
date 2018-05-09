@@ -27,16 +27,16 @@
           <widget class="QWidget" name="widget_3" native="true">
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QRadioButton" name="radioButton">
+             <widget class="QRadioButton" name="mobileRadioButton">
               <property name="text">
-               <string>Mobile</string>
+               <string>Mobi&amp;le</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButton_2">
+             <widget class="QRadioButton" name="desktopRadioButton">
               <property name="text">
-               <string>Desktop</string>
+               <string>&amp;Desktop</string>
               </property>
              </widget>
             </item>
@@ -62,7 +62,7 @@
           <widget class="QWidget" name="widget_4" native="true">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QLineEdit" name="lineEdit">
+             <widget class="QLineEdit" name="widthLine">
               <property name="placeholderText">
                <string>Width</string>
               </property>
@@ -76,7 +76,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit_2">
+             <widget class="QLineEdit" name="heightLine">
               <property name="placeholderText">
                <string>Height</string>
               </property>
@@ -95,7 +95,7 @@
     <widget class="QWidget" name="widget_5" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="cancelButton">
         <property name="text">
          <string>Cancel</string>
         </property>
@@ -115,7 +115,7 @@
        </spacer>
       </item>
       <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="saveButton">
         <property name="text">
          <string>Save</string>
         </property>
