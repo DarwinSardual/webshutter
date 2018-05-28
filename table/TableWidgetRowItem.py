@@ -20,7 +20,6 @@ class TableWidgetRowItem:
         self.table = None
         self.__toggleCallback = None
 
-        self.__setAlignment()
         self.__setFlags()
         self.__initSignals()
 
@@ -69,9 +68,6 @@ class TableWidgetRowItem:
 
     def getItem(self):
         return self.__item
-
-    #def setTable(self, table): #backup method in case we need reference to the table
-        #self.table = table
 
     # Callbacks
 
