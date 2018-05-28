@@ -1,7 +1,8 @@
 import threading, time, os, subprocess
-from util.Config import Config
-from util.Status import Status
+from Config import Config
+from Status import Status
 from PyQt5 import QtCore
+import json
 
 class WebShutterThread(QtCore.QThread):
 
@@ -17,15 +18,16 @@ class WebShutterThread(QtCore.QThread):
 
     def run(self):
         self.toProcessCallback.emit(self.rowItem, Status.IN_PROCESS, False)
-        #os.environ["PHANTOMJS_EXECUTABLE"] = str(Config.ENV)
-        os.environ["PATH"] += os.pathsep + str(Config.ENV)
+        
+        os.environ["PHANTOMJS_EXECUTABLE"] = str(Config.ENV)
+        #os.environ["PATH"] += os.pathsep + str(Config.ENV)
         p = subprocess.Popen(self.command, env=os.environ, stdout=subprocess.PIPE, shell=True)
-
+        
         while True:
             line = p.stdout.readline()
             if not line:
                 break
             else:
                 print(line)
-                
+        
         self.finishCallback.emit(self.rowItem, Status.COMPLETED)
