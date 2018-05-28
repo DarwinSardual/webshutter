@@ -120,10 +120,13 @@ class WebShutterUIController:
 
         items = []
         for link in linkList:
-            item = Item(-1, link, Status.PENDING, True)
-            id = self.__addItemToDatabase(item)
-            if id > 0:
-                item.dbId = id
+
+            item = Item(0, link, Status.PENDING, True)
+            # dont add item to database
+            #item = Item(-1, link, Status.PENDING, True)
+            #id = self.__addItemToDatabase(item)
+            #if id > 0:
+            #    item.dbId = id
             rowItem = TableWidgetRowItem(item)
             self.webShutterUI.tableWidget.addRowItem(rowItem)
             rowItem.setToggleCallback(self.__toggleCheckbox)
