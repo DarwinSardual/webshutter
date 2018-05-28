@@ -3,13 +3,15 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QDialog, QDesktopWidget, QRadioButton, QLineEdit, QPushButton
 import os
+from UI_Preferences import UI_Preferences
 
 class PreferencesUI(QDialog):
     
     def __init__(self):
         super(PreferencesUI, self).__init__()
         self.dw = QDesktopWidget();
-        self.prefUIRef = uic.loadUi(os.path.join(os.path.dirname(os.path.realpath(__file__)),'PreferencesUI.ui'), self)
+        self.prefUIRef = UI_Preferences()
+        self.prefUIRef.setupUi(self)
         
         self.dialogMaxSize = self.__setDialogMaxSize(0.20, 0.10) # set using percent
         width, height = self.dialogMaxSize
@@ -20,14 +22,14 @@ class PreferencesUI(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
         
     def __initWidgets(self):
-        self.mobileRadioButton = self.prefUIRef.findChild(QRadioButton, "mobileRadioButton")
-        self.desktopRadioButton = self.prefUIRef.findChild(QRadioButton, "desktopRadioButton")
+        self.mobileRadioButton = self.prefUIRef.mobileRadioButton
+        self.desktopRadioButton = self.prefUIRef.desktopRadioButton
         
-        self.widthLine = self.prefUIRef.findChild(QLineEdit, "widthLine")
-        self.heightLine = self.prefUIRef.findChild(QLineEdit, "heightLine")
+        self.widthLine = self.prefUIRef.widthLine
+        self.heightLine = self.prefUIRef.heightLine
         
-        self.cancelButton = self.prefUIRef.findChild(QPushButton, "cancelButton")
-        self.saveButton = self.prefUIRef.findChild(QPushButton, "saveButton")
+        self.cancelButton = self.prefUIRef.cancelButton
+        self.saveButton = self.prefUIRef.saveButton
         
         validator = QIntValidator(5000, 5000)
         
