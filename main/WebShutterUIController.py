@@ -5,6 +5,7 @@ from collections import deque
 from threading import Thread
 import json
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 
 from WebShutterUI import WebShutterUI
 from TableWidgetRowItem import TableWidgetRowItem
@@ -14,31 +15,72 @@ from SqliteCon import SqliteCon
 from Config import Config
 from WebShutterThread import WebShutterThread
 from PreferencesUIController import PreferencesUIController
+from Dimension import Dimension
 
 class WebShutterUIController:
 
     def __init__(self):
         self.webShutterUI = WebShutterUI()
-        self.__initSignals()
         self.__databaseConnection = SqliteCon()
         self.__toRun = False
         self.__numThreads = 0
         self.__threads = deque()
         self.results = Queue()
         self.resultToProcess = 0
-        
-        self.dirname = os.path.dirname(os.path.abspath(__file__))
-        
+
+        #self.dirname = os.path.dirname(os.path.abspath(__file__))
+        if not Config.checkPreferencesConfig() or not Config.checkPreferencesConfigFormat():
+            Config.createPreferencesConfig()
+
+        Config.createSaveDirectory()
         self.__setupTable()
-    
+
+        self.mode = None
+
+        self.pref = Config.getConfig()
+        self.__initPreferences()
+        self.__initSignals()
+
+    def __initPreferences(self):
+        #self.preferencesUI.widthLine.setText(str(self.pref["dimensions"]["width"]))
+        #self.preferencesUI.heightLine.setText(str(self.pref["dimensions"]["height"]))
+
+        if self.pref["mode"] == "mobile":
+            self.webShutterUI.mobileRadioButton.setChecked(True)
+            self.mode = self.pref["mode"]
+        else:
+            self.webShutterUI.desktopRadioButton.setChecked(True)
+            self.mode = "desktop" #fail safe in case the json file has been modified
+
+        self.webShutterUI.mobileRadioButton.toggled.connect(lambda: self.__modeToggled(self.webShutterUI.mobileRadioButton))
+        self.webShutterUI.desktopRadioButton.toggled.connect(lambda: self.__modeToggled(self.webShutterUI.desktopRadioButton))
+
+        # Set Dimensions
+        index = 0
+        #isDimensionSet = False
+        for dimension in Dimension.Value:
+            self.webShutterUI.dimensionsCombo.addItem(str(dimension["width"]) + " x " + str(dimension["height"]))
+            if self.pref["dimensions"]["width"] == dimension["width"] and self.pref["dimensions"]["height"] == dimension["height"]:
+                self.webShutterUI.dimensionsCombo.setCurrentIndex(index)
+            #    isDimensionSet = True
+            else:
+                index += 1
+
+        #if not isDimensionSet:
+        #    Config.createPreferencesConfig()
+
+
     def __initSignals(self):
-        self.webShutterUI.tableWidget.rowInput.addButton.clicked.connect(self.addButtonClicked)
+        #self.webShutterUI.tableWidget.rowInput.addButton.clicked.connect(self.addButtonClicked)
+        #self.webShutterUI.addButton.clicked.connect(self.addButtonClicked)
         self.webShutterUI.deleteButton.clicked.connect(self.deleteButtonClicked)
         self.webShutterUI.searchButton.clicked.connect(self.searchButtonClicked)
         self.webShutterUI.startStopButton.clicked.connect(self.startStopButtonClicked)
-        self.webShutterUI.preferencesAction.triggered.connect(self.preferencesActionTriggered)
-        self.webShutterUI.exitAction.triggered.connect(self.webShutterUI.close)
-        
+        self.webShutterUI.inputTextEdit.setCallback(self.addAndStart)
+        self.webShutterUI.dimensionsCombo.currentIndexChanged.connect(self.__dimensionChanged)
+        #self.webShutterUI.preferencesAction.triggered.connect(self.preferencesActionTriggered)
+        #self.webShutterUI.exitAction.triggered.connect(self.webShutterUI.close)
+
     def __setupTable(self):
          data = self.__fetchAllDataFromDatabase()
          self.fillTable(data)
@@ -49,11 +91,11 @@ class WebShutterUIController:
         searchText = self.webShutterUI.searchLine.text().strip()
         filterBy = comboBox.currentText().lower()
         # implement search
-        
+
         res = self.__searchFromDatabase(searchText, filterBy)
         self.webShutterUI.tableWidget.clearTable()
         self.fillTable(res)
-    
+
     def fillTable(self, items):
         for dbId, url, status, statusText, isChecked in items:
             item = Item(dbId, url, status, isChecked)
@@ -65,17 +107,18 @@ class WebShutterUIController:
         items = self.webShutterUI.tableWidget.deleteCheckedItems()
         for item in items:
             self.__deleteItemFromDatabase(item.getItem().dbId)
-        
+
     def addButtonClicked(self):
 
-        links = self.webShutterUI.tableWidget.rowInput.linkInput.toPlainText()
+        links = self.webShutterUI.inputTextEdit.toPlainText()
         links = links.strip()
-        
+
         if links == "":
             return # empty string
-        
+
         linkList = re.split("\s+", links)
 
+        items = []
         for link in linkList:
             item = Item(-1, link, Status.PENDING, True)
             id = self.__addItemToDatabase(item)
@@ -84,22 +127,28 @@ class WebShutterUIController:
             rowItem = TableWidgetRowItem(item)
             self.webShutterUI.tableWidget.addRowItem(rowItem)
             rowItem.setToggleCallback(self.__toggleCheckbox)
+            items.append(rowItem)
 
-        self.webShutterUI.tableWidget.rowInput.linkInput.setText("")
+        self.webShutterUI.inputTextEdit.setText("")
+        return items
 
     def startStopButtonClicked(self):
-        
-        
+
         if self.__toRun:
             self.__toRun = False
             return
 
-        
         checkedRowItems = self.webShutterUI.tableWidget.getCheckedRowItems()
-        
+        self.spawnThread(checkedRowItems)
+
+        #spawn a new thread to start the threads
+        startThread = Thread(target=self.__startThreads)
+        startThread.start()
+
+    def spawnThread(self, rowItems):
         args = self.getGeneralArgs()
 
-        for item in checkedRowItems:
+        for item in rowItems:
             link = item.getItem().link
             filename =  link + "_" + time.strftime('%Y%M%d%H%M%S%Ms') + Config.IMAGE_EXT
             filenameArgs = "--filename" + filename
@@ -114,18 +163,22 @@ class WebShutterUIController:
             thread.finishCallback.connect(self.finishThreading)
             thread.toProcessCallback.connect(self.updateRowItem)
 
+
             self.__threads.append(thread)
 
-        #spawn a new thread to start the threads
-        startThread = Thread(target=self.__startThreads)
-        startThread.start()
+    def addAndStart(self):
+        rowItems = self.addButtonClicked()
+        if self.__toRun:
+            self.spawnThread(rowItems)
+        else:
+            self.startStopButtonClicked()
 
-    def preferencesActionTriggered(self):
-        
-        if not Config.checkPreferencesConfig() and not Config.checkPreferencesConfigFormat():
-            Config.createPreferencesConfig()
-            
-        self.pref = PreferencesUIController()
+    #def preferencesActionTriggered(self):
+
+    #    if not Config.checkPreferencesConfig() or not Config.checkPreferencesConfigFormat():
+    #        Config.createPreferencesConfig()
+
+    #    self.pref = PreferencesUIController()
 
     #START - callback methods for the thread
 
@@ -148,26 +201,43 @@ class WebShutterUIController:
 
         if not Config.checkPreferencesConfig() and not Config.checkPreferencesConfigFormat():
             Config.createPreferencesConfig()
-            
+
         pref = Config.getConfig()
 
         #get the settings here
-        #path = "D:\\DarwinFiles\\Work\\Projects\\webshutter\\test\\save"
-        path = "/home/darwin/Projects/Python/webshutter/test/save"
+        path = "D:\\DarwinFiles\\Work\\Projects\\webshutter\\test\\save"
+        #path = "/home/darwin/Projects/Python/webshutter/test/save"
         sizeArgs = "--size=" + str(pref["dimensions"]["width"]) + "x" + str(pref["dimensions"]["height"])
-        deviceArgs = "--desktop"
+        deviceArgs = "--" + pref["mode"]
         pathArgs = "--output" + path
 
-        args = { "size": sizeArgs, "device": deviceArgs, "path": pathArgs,
+        args = { "size": sizeArgs, "device": str(deviceArgs), "path": pathArgs,
             "casperJS": Config.CASPERJS_PATH, "screenshotScript": Config.SCREENSHOT_SCRIPT_PATH
         }
 
         return args
-    
+
+    def __dimensionChanged(self, index):
+        dimension = Dimension.Value[index]
+        self.pref["dimensions"]["width"] = dimension["width"]
+        self.pref["dimensions"]["height"] = dimension["height"]
+
+        Config.createPreferencesConfig(self.pref)
+
+    def __modeToggled(self, button):
+
+        if button.isChecked():
+            if button == self.webShutterUI.mobileRadioButton:
+                self.pref["mode"] = "mobile"
+                Config.createPreferencesConfig(self.pref)
+            elif button == self.webShutterUI.desktopRadioButton:
+                self.pref["mode"] = "desktop"
+                Config.createPreferencesConfig(self.pref)
+
     def __toggleCheckbox(self, item):
-       
+
         checkbox = self.webShutterUI.tableWidget.getCheckboxAll()
-        
+
         if item.isChecked:
             self.webShutterUI.tableWidget.setNumCheck(self.webShutterUI.tableWidget.getNumCheck() + 1)
         else:
@@ -180,6 +250,11 @@ class WebShutterUIController:
     def __startThreads(self):
         #start threading
         self.__toRun = True
+        stopIconPath = "images/stop.svg"
+        stopIcon = QIcon(stopIconPath)
+        self.webShutterUI.startStopButton.setIcon(stopIcon)
+        self.webShutterUI.startStopButton.setText("Stop")
+        self.webShutterUI.deleteButton.setEnabled(False)
 
         while len(self.__threads) > 0 and self.__toRun:
             if self.__numThreads < Config.MAX_THREADS:
@@ -187,7 +262,15 @@ class WebShutterUIController:
                 thread = self.__threads.popleft()
                 thread.start()
             time.sleep(1)
-        
+
+        self.__toRun = False
+        playIconPath = "images/play.svg"
+        playIcon = QIcon(playIconPath)
+        self.webShutterUI.startStopButton.setIcon(playIcon)
+        self.webShutterUI.startStopButton.setText("Start")
+        self.webShutterUI.deleteButton.setEnabled(True)
+
+        self.__threads = deque() # always clear the threads before after running
 
     def __fetchAllDataFromDatabase(self):
         sql = "select * from urls"
@@ -197,7 +280,7 @@ class WebShutterUIController:
     def __searchFromDatabase(self, searchText, filterBy):
         sql = "SELECT * from urls "
         params = ()
-        
+
         if filterBy == "url":
             sql += "Where url like ?"
             params = (searchText + "%", )
@@ -207,7 +290,7 @@ class WebShutterUIController:
         else:
             sql += "WHERE url LIKE ? or status_label LIKE ?"
             params = (searchText + "%", searchText + "%")
-            
+
         return self.__databaseConnection.fetchall(sql, params)
 
     def __addItemToDatabase(self,item):
