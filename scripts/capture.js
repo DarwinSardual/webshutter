@@ -47,11 +47,12 @@ var USER_AGENTS = {
 	]
 };
 
-var rest_url_root = "http://localhost:8080/"
+var rest_url_root = "http://localhost:8080/";
+var currDate = new Date();
 
 var app = {
 	FS : null, // file system module for logging.
-	OUTPUT_DIR : "save",
+	OUTPUT_DIR : "save/" + currDate.getFullYear() + "-" + (currDate.getMonth() +1) + "-" + currDate.getDate(),
 	IMG_EXT : ".png",
 	/*
 		args:
@@ -90,7 +91,7 @@ var app = {
 		});
 	},
 	random : function(length){
-		return Math.floor((Math.random() * length) + 1); 
+		return Math.floor((Math.random() * length) + 1);
 	},
 	getRandomUserAgent : function(isMobile){
 		if(isMobile){
@@ -114,14 +115,14 @@ var app = {
 			casper.echo("Usage : ");
 			casper.echo("");
 			casper.echo("casperjs " + script_name + " http://example.com ");
-			casper.echo("casperjs " + script_name + " --urls=http://example.com,http://example2.com");	
+			casper.echo("casperjs " + script_name + " --urls=http://example.com,http://example2.com");
 			casper.echo("");
 			casper.echo("Other arguments : ");
 			casper.echo("");
 			casper.echo("--mobile            - set the user agent as mobile and the min screen");
 			casper.echo("                      resolution is 426 x 320 and the max screen");
 			casper.echo("                      resolution is 600 x 800");
-			casper.echo("--desktop           - set the user agent as desktop and the min"); 
+			casper.echo("--desktop           - set the user agent as desktop and the min");
 			casper.echo("                      screen resolution is 960 x 720 and the max");
 			casper.echo("                      screen resolution is 1280 x 1024");
 			casper.echo("--responsive        - set the user agent as desktop and the min and");
@@ -136,7 +137,7 @@ var app = {
 			casper.echo("=================================================");
 			casper.echo("");
 			return false;
-		}		
+		}
 		return true;
 	},
 	setEvents : function(casper){
@@ -162,7 +163,7 @@ var app = {
 		data.domain = data.domain.replace("://", "")
 		data.domain = data.domain.replace("/","_")
 		data.url = "http://" + data.domain;
- 
+
 		if(casper.cli.has("size")){
 			temp = casper.cli.get("size").split("x")
 			if(temp.length > 1){
@@ -180,10 +181,10 @@ var app = {
 		}
 		data.filename = data.domain  + "_" + data.size.width + "x" + data.size.height + "_" + (new Date()).getTime() + app.IMG_EXT;
 		data.filesrc = app.OUTPUT_DIR + "/" + data.filename
-		
+
 		if(casper.cli.has("filename")){
 			data.filename = casper.cli.get("filename")
-			data.filesrc = app.OUTPUT_DIR + "/" + data.filename 
+			data.filesrc = app.OUTPUT_DIR + "/" + data.filename
 		}
 
 		return data
