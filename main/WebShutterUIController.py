@@ -6,6 +6,7 @@ from threading import Thread
 import json
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QProgressDialog, QApplication
 
 from WebShutterUI import WebShutterUI
 from TableWidgetRowItem import TableWidgetRowItem
@@ -119,7 +120,22 @@ class WebShutterUIController:
         linkList = re.split("\s+", links)
 
         items = []
+
+        i = 0
+        progressDialog = QProgressDialog(self.webShutterUI)
+        itemLength = len(linkList)
+        progressDialog.setRange(i, itemLength)
+        progressDialog.setLabelText("Adding links, please wait")
+        progressDialog.setWindowModality(Qt.WindowModal);
+        progressDialog.setModal(True)
+
+        progressDialog.show()
         for link in linkList:
+            progressDialog.setValue(i)
+            QApplication.processEvents()
+
+            if progressDialog.wasCanceled():
+                break
 
             item = Item(0, link, Status.PENDING, True)
             # dont add item to database
@@ -131,6 +147,8 @@ class WebShutterUIController:
             self.webShutterUI.tableWidget.addRowItem(rowItem)
             rowItem.setToggleCallback(self.__toggleCheckbox)
             items.append(rowItem)
+            i += 1
+        progressDialog.setValue(itemLength)
 
         self.webShutterUI.inputTextEdit.setText("")
         return items
